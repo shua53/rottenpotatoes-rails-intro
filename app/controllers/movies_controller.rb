@@ -8,41 +8,24 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-  
-    # Check if the user has explicitly set new sorting/filtering settings in params
-    if params[:ratings] || params[:sort_by]
-      @ratings_to_show = params[:ratings].keys if params[:ratings]
-      @ratings_to_show_hash = Hash[@ratings_to_show.collect { |key| [key, '1'] }] if @ratings_to_show
-      session[:ratings] = @ratings_to_show
-      session[:sort_by] = params[:sort_by]
+    
+    if !params.has_key?(:ratings)
+      @ratings_to_show = []
     else
-      # If no params were passed for sorting or filtering, check if there are settings stored in session
-      @ratings_to_show = session[:ratings]
-      @ratings_to_show_hash = Hash[@ratings_to_show.collect { |key| [key, '1'] }] if @ratings_to_show
+      @ratings_to_show = params[:ratings].keys
+      @ratings_to_show_hash = Hash[@ratings_to_show.collect {|key| [key, '1']}]
     end
-  
-    # Retrieve movies based on filtering settings or show all movies if no filters are applied
-    if @ratings_to_show
-      @movies = Movie.with_ratings(@ratings_to_show)
-    else
-      @movies = Movie.all
-    end
-  
-    # Sort movies based on sort_by parameter or session settings
+    
+    @movies = Movie.with_ratings(@ratings_to_show)
+    
     @title_header = ''
     @release_date_header = ''
-    if params[:sort_by]
+    if params.has_key?(:sort_by)
       @movies = @movies.order(params[:sort_by])
-      @title_header = 'hilite bg-warning' if params[:sort_by] == 'title'
-      @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date'
-    elsif session[:sort_by]
-      @movies = @movies.order(session[:sort_by])
-      @title_header = 'hilite bg-warning' if session[:sort_by] == 'title'
-      @release_date_header = 'hilite bg-warning' if session[:sort_by] == 'release_date'
+      @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
+      @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
     end
   end
-  
-  
 
   def new
     # default: render 'new' template
