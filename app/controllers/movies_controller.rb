@@ -21,10 +21,14 @@ class MoviesController < ApplicationController
       @ratings_to_show_hash = Hash[@ratings_to_show.collect { |key| [key, '1'] }] if @ratings_to_show
     end
   
-    # Retrieve movies based on filtering settings
-    @movies = Movie.with_ratings(@ratings_to_show)
+    # Retrieve movies based on filtering settings or show all movies if no filters are applied
+    if @ratings_to_show
+      @movies = Movie.with_ratings(@ratings_to_show)
+    else
+      @movies = Movie.all
+    end
   
-    # Sort movies based on sort_by parameter
+    # Sort movies based on sort_by parameter or session settings
     @title_header = ''
     @release_date_header = ''
     if params[:sort_by]
@@ -37,6 +41,7 @@ class MoviesController < ApplicationController
       @release_date_header = 'hilite bg-warning' if session[:sort_by] == 'release_date'
     end
   end
+  
   
 
   def new
