@@ -15,9 +15,11 @@ class MoviesController < ApplicationController
     if params.has_key?(:ratings)
       @ratings_to_show = params[:ratings].keys
       session[:ratings] = @ratings_to_show # Store in session
-    elsif session.key?(:ratings)
+    elsif session.key?(:ratings) && !params.has_key?(:sort_by)
       @ratings_to_show = session[:ratings]
       params[:ratings] = Hash[@ratings_to_show.collect { |key| [key, '1'] }]
+      redirect_to movies_path(sort_by: session[:sort_by], ratings: Hash[@ratings_to_show.collect { |key| [key, '1'] }])
+      return
     else
       @ratings_to_show = @all_ratings
     end
@@ -26,20 +28,19 @@ class MoviesController < ApplicationController
     if params.has_key?(:sort_by)
       @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort_by])
       session[:sort_by] = params[:sort_by] # Store in session
-    elsif session.key?(:sort_by)
-      # Redirect to RESTful route with the sort_by from session and ratings from session
+    elsif session.key?(:sort_by) && !params.has_key?(:ratings)
+      # Redirect to RESTful route with the sort_by and ratings from session
       redirect_to movies_path(sort_by: session[:sort_by], ratings: Hash[@ratings_to_show.collect { |key| [key, '1'] }])
       return
     else
       @movies = Movie.with_ratings(@ratings_to_show)
     end
   
+    # Set sorting headers
+    @title_header = 'hilite bg-warning' if params[:sort_by] == 'title' || session[:sort_by] == 'title'
+    @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date' || session[:sort_by] == 'release_date'
+  end
   
-
-  # Set sorting headers
-  @title_header = 'hilite bg-warning' if params[:sort_by] == 'title' || session[:sort_by] == 'title'
-  @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date' || session[:sort_by] == 'release_date'
-end
   
   
   
