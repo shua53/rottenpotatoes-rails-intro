@@ -26,21 +26,6 @@ class MoviesController < ApplicationController
       @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
     end
   end
-  
-    # Sort movies based on sort_by parameter or session settings
-    @title_header = ''
-    @release_date_header = ''
-    if params[:sort_by]
-      @movies = @movies.order(params[:sort_by])
-      @title_header = 'hilite bg-warning' if params[:sort_by] == 'title'
-      @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date'
-    elsif session[:sort_by]
-      @movies = @movies.order(session[:sort_by])
-      @title_header = 'hilite bg-warning' if session[:sort_by] == 'title'
-      @release_date_header = 'hilite bg-warning' if session[:sort_by] == 'release_date'
-    end
-  end
-  
 
   def new
     # default: render 'new' template
