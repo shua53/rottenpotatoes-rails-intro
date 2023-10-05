@@ -87,6 +87,12 @@ class MoviesController < ApplicationController
     #   @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
     #   @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
     end
+
+
+    if params[:ratings] != session[:ratings] || params[:sort_by] != session[:sort_by]
+      redirect_to movies_path(ratings: session[:ratings], sort_by: session[:sort_by]) and return
+    end
+    
   end
 
   def new
