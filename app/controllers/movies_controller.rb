@@ -9,23 +9,31 @@ class MoviesController < ApplicationController
   def index
     @all_ratings = Movie.all_ratings
     
+    # Check if params[] were passed for sorting or filtering
+    if !params.has_key?(:ratings) && !params.has_key?(:sort_by) && session[:ratings] && session[:sort_by]
+      # If no params are provided and session[] has values, redirect with the stored settings
+      redirect_to movies_path(ratings: session[:ratings], sort_by: session[:sort_by])
+    end
+  
     if !params.has_key?(:ratings)
-      @ratings_to_show = []
+      @ratings_to_show = session[:ratings] || []
     else
       @ratings_to_show = params[:ratings].keys
-      @ratings_to_show_hash = Hash[@ratings_to_show.collect {|key| [key, '1']}]
+      session[:ratings] = @ratings_to_show
     end
-    
+  
     @movies = Movie.with_ratings(@ratings_to_show)
-    
+  
     @title_header = ''
     @release_date_header = ''
     if params.has_key?(:sort_by)
       @movies = @movies.order(params[:sort_by])
-      @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
-      @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
+      session[:sort_by] = params[:sort_by]
+      @title_header = 'hilite bg-warning' if params[:sort_by] == 'title'
+      @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date'
     end
   end
+  
 
   def new
     # default: render 'new' template
