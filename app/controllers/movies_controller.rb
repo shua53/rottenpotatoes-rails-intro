@@ -47,17 +47,21 @@ class MoviesController < ApplicationController
 
 
     @movies = Movie.with_ratings(@ratings_to_show)
-    
+
     @title_header = ''
     @release_date_header = ''
-    if params.has_key?(:sort_by)
-      @movies = @movies.order(params[:sort_by])
-      @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
-      @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
-    elsif !params.has_key?(:sort_by) && session.key?(:sort_by)
+    # if params.has_key?(:sort_by)
+    #   @movies = @movies.order(params[:sort_by])
+    #   @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
+    #   @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
+    if !params.has_key?(:sort_by) && session.key?(:sort_by)
       @movies = @movies.order(session[:sort_by])
       @title_header = 'hilite bg-warning' if session[:sort_by]=='title'
       @release_date_header = 'hilite bg-warning' if session[:sort_by]=='release_date'
+    elsif params.has_key?(:sort_by)
+        @movies = @movies.order(params[:sort_by])
+        @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
+        @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
     # else
     #   @ratings_to_show = params[:ratings].keys
     #   @ratings_to_show_hash = Hash[@ratings_to_show.collect {|key| [key, '1']}]
