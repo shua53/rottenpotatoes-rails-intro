@@ -6,33 +6,35 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
+  
   def index
-  @all_ratings = Movie.all_ratings
-
-  # Check if ratings are in params or session
-  if params.has_key?(:ratings)
-    @ratings_to_show = params[:ratings].keys
-    session[:ratings] = @ratings_to_show # Store in session
-  elsif session.key?(:ratings) && !params.has_key?(:sort_by)
-    @ratings_to_show = session[:ratings]
-    params[:ratings] = Hash[@ratings_to_show.collect { |key| [key, '1'] }]
-    redirect_to movies_path(sort_by: session[:sort_by], ratings: Hash[@ratings_to_show.collect { |key| [key, '1'] }])
-    return
-  else
-    @ratings_to_show = @all_ratings
-  end
-
-  # Check if sort_by is in params or session
-  if params.has_key?(:sort_by)
-    @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort_by])
-    session[:sort_by] = params[:sort_by] # Store in session
-  elsif session.key?(:sort_by) && !params.has_key?(:ratings)
-    # Redirect to RESTful route with the sort_by from session
-    redirect_to movies_path(sort_by: session[:sort_by], ratings: Hash[@ratings_to_show.collect { |key| [key, '1'] }])
-    return
-  else
-    @movies = Movie.with_ratings(@ratings_to_show)
-  end
+    @all_ratings = Movie.all_ratings
+  
+    # Check if ratings and sort_by are in params or session
+    if (params.has_key?(:ratings) && params.has_key?(:sort_by)) ||
+       (session.key?(:ratings) && session.key?(:sort_by))
+      
+      if params.has_key?(:ratings)
+        @ratings_to_show = params[:ratings].keys
+        session[:ratings] = @ratings_to_show # Store in session
+      elsif session.key?(:ratings)
+        @ratings_to_show = session[:ratings]
+        params[:ratings] = Hash[@ratings_to_show.collect { |key| [key, '1'] }]
+      end
+  
+      if params.has_key?(:sort_by)
+        @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort_by])
+        session[:sort_by] = params[:sort_by] # Store in session
+      elsif session.key?(:sort_by)
+        # Redirect to RESTful route with the sort_by from session
+        redirect_to movies_path(sort_by: session[:sort_by], ratings: Hash[@ratings_to_show.collect { |key| [key, '1'] }])
+        return
+      end
+    else
+      @ratings_to_show = @all_ratings
+      @movies = Movie.with_ratings(@ratings_to_show)
+    end
+  
 
   # Set sorting headers
   @title_header = 'hilite bg-warning' if params[:sort_by] == 'title' || session[:sort_by] == 'title'
