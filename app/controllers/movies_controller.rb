@@ -9,31 +9,29 @@ class MoviesController < ApplicationController
   def index
     @all_ratings = Movie.all_ratings
     
-    # Check if params[] were passed for sorting or filtering
-    if !params.has_key?(:ratings) && !params.has_key?(:sort_by) && session[:ratings] && session[:sort_by]
-      # If no params are provided and session[] has values, redirect with the stored settings
-      redirect_to movies_path(ratings: session[:ratings], sort_by: session[:sort_by])
+    if !session.key?(:ratings) || !session.key?(:sort_by)
+      @all_ratings_hash = Hash[@all_ratings.collect {|key| [key, '1']}]
+      session[:ratings] = @all_ratings_hash if !session.key?(:ratings)
+      session[:sort_by] = '' if !session.key?(:sort_by)
+      redirect_to movies_path(:ratings => @all_ratings_hash, :sort_by => '') and return
     end
-  
-    if !params.has_key?(:ratings)
-      @ratings_to_show = session[:ratings] || []
-    else
-      @ratings_to_show = params[:ratings].keys
-      session[:ratings] = @ratings_to_show
+    
+    if (!params.has_key?(:ratings) && session.key?(:ratings)) ||
+      (!params.has_key?(:sort_by) && session.key?(:sort_by))
+      redirect_to movies_path(:ratings => Hash[session[:ratings].collect {|key| [key, '1']}], :sort_by => session[:sort_by]) and return
     end
-  
+    
+    @ratings_to_show = params[:ratings].keys
+    @ratings_to_show_hash = Hash[@ratings_to_show.collect {|key| [key, '1']}]
+    session[:ratings] = @ratings_to_show
+    
     @movies = Movie.with_ratings(@ratings_to_show)
-  
-    @title_header = ''
-    @release_date_header = ''
-    if params.has_key?(:sort_by)
-      @movies = @movies.order(params[:sort_by])
-      session[:sort_by] = params[:sort_by]
-      @title_header = 'hilite bg-warning' if params[:sort_by] == 'title'
-      @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date'
-    end
+    
+    @movies = @movies.order(params[:sort_by]) if params[:sort_by] != ''
+    session[:sort_by] = params[:sort_by]
+    @title_header = (params[:sort_by]=='title') ? 'hilite bg-warning' : ''
+    @release_date_header = (params[:sort_by]=='release_date') ? 'hilite bg-warning' : ''
   end
-  
 
   def new
     # default: render 'new' template
