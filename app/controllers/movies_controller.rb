@@ -8,39 +8,35 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-
-    if !params.has_key?(:ratings) && !session.key?(:ratings)
-      @ratings_to_show = @all_ratings
-    elsif !params.has_key?(:ratings) && session.key?(:ratings)
-      @ratings_to_show = session[:ratings].keys
-      @ratings_to_show_hash = Hash[@ratings_to_show.collect {|key| [key, '1']}]
-      params[:ratings] = @ratings_to_show_hash
-    else
+  
+    # Check if ratings are in params or session
+    if params.has_key?(:ratings)
       @ratings_to_show = params[:ratings].keys
-      @ratings_to_show_hash = Hash[@ratings_to_show.collect {|key| [key, '1']}]
-      session[:ratings] = @ratings_to_show_hash
+      session[:ratings] = @ratings_to_show # Store in session
+    elsif session.key?(:ratings)
+      # Redirect to RESTful route with the ratings from session
+      redirect_to movies_path(ratings: Hash[session[:ratings].map { |r| [r, '1'] }])
+      return # Terminate the action
+    else
+      @ratings_to_show = @all_ratings
     end
-
-
-    @movies = Movie.with_ratings(@ratings_to_show)
-
-    @title_header = ''
-    @release_date_header = ''
-    # if params.has_key?(:sort_by)
-    #   @movies = @movies.order(params[:sort_by])
-    #   @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
-    #   @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
-    if !params.has_key?(:sort_by) && session.key?(:sort_by)
-      @movies = @movies.order(session[:sort_by])
-      @title_header = 'hilite bg-warning' if session[:sort_by]=='title'
-      @release_date_header = 'hilite bg-warning' if session[:sort_by]=='release_date'
-    elsif params.has_key?(:sort_by)
-        @movies = @movies.order(params[:sort_by])
-        @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
-        @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
-        session[:sort_by] = params[:sort_by]
+  
+    # Check if sort_by is in params or session
+    if params.has_key?(:sort_by)
+      @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort_by])
+      @title_header = 'hilite bg-warning' if params[:sort_by] == 'title'
+      @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date'
+      session[:sort_by] = params[:sort_by] # Store in session
+    elsif session.key?(:sort_by)
+      # Redirect to RESTful route with the sort_by from session
+      redirect_to movies_path(sort_by: session[:sort_by], ratings: Hash[session[:ratings].map { |r| [r, '1'] }])
+      return # Terminate the action
+    else
+      @movies = Movie.with_ratings(@ratings_to_show)
     end
   end
+  
+  
 
   def new
     # default: render 'new' template
