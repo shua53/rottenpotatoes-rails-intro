@@ -28,7 +28,7 @@ class MoviesController < ApplicationController
     if params.has_key?(:ratings)
       @ratings_to_show = params[:ratings].keys
       session[:ratings] = @ratings_to_show # Store in session
-    elsif session.key?(:ratings) || session.key?(:sort_by)
+    elsif session.key?(:ratings)
       @ratings_to_show = session[:ratings]
       params[:ratings] = Hash[@ratings_to_show.collect { |key| [key, '1'] }]
     else
