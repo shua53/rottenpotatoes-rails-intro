@@ -62,11 +62,22 @@ class MoviesController < ApplicationController
         @movies = @movies.order(params[:sort_by])
         @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
         @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
+        session[:sort_by] = params[:sort_by]
     # else
     #   @ratings_to_show = params[:ratings].keys
     #   @ratings_to_show_hash = Hash[@ratings_to_show.collect {|key| [key, '1']}]
     #   session[:ratings] = @ratings_to_show
-    end
+
+
+    # if params[:sort_by]
+    #   @movies = @movies.order(params[:sort_by])
+    #   @title_header = 'hilite bg-warning' if params[:sort_by] == 'title'
+    #   @release_date_header = 'hilite bg-warning' if params[:sort_by] == 'release_date'
+    # elsif session[:sort_by]
+    #   @movies = @movies.order(session[:sort_by])
+    #   @title_header = 'hilite bg-warning' if session[:sort_by] == 'title'
+    #   @release_date_header = 'hilite bg-warning' if session[:sort_by] == 'release_date'
+    # end
 
     
     # @title_header = ''
@@ -75,7 +86,7 @@ class MoviesController < ApplicationController
     #   @movies = @movies.order(params[:sort_by])
     #   @title_header = 'hilite bg-warning' if params[:sort_by]=='title'
     #   @release_date_header = 'hilite bg-warning' if params[:sort_by]=='release_date'
-    # end
+    end
   end
 
   def new
