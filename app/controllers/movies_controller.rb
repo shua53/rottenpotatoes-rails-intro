@@ -20,8 +20,10 @@ class MoviesController < ApplicationController
       params[:sort_by] = session[:sort_by]
       redirect = true
     end
-
-    redirect_to movies_path(params) if redirect
+    
+    if redirect
+      redirect_to movies_path(params) if redirect
+    end
 
 
     if !params.has_key?(:ratings) && !session.key?(:ratings)
